@@ -9,7 +9,9 @@ import org.springframework.web.server.ResponseStatusException;
 import se.ecutb.loffe.library.entities.AppUser;
 import se.ecutb.loffe.library.repositories.AppUserRepository;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -19,8 +21,20 @@ public class AppUserService {
     private final AppUserRepository appUserRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public List<AppUser> findAll() {
-        return appUserRepo.findAll();
+    public List<AppUser> findAll(String username, boolean sort) {
+        var appUsers = appUserRepo.findAll();
+        if (username != null) {
+            appUsers = appUsers.stream()
+                    .filter(appUser -> appUser.getUsername().contains(username))
+                    .collect(Collectors.toList());
+
+        }
+
+        if (sort) {
+            appUsers.sort(Comparator.comparing(AppUser::getUsername));
+        }
+
+        return appUsers;
     }
 
     public AppUser findById(String id) {
