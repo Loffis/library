@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AppUserService {
 
+
     private final AppUserRepository appUserRepo;
     private final PasswordEncoder passwordEncoder;
 
