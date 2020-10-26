@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @Builder
 public class AppUser implements Serializable {
+
     @Id
     private String id;
     @Indexed(unique = true)

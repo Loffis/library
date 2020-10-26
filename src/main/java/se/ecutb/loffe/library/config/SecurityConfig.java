@@ -17,6 +17,7 @@ import se.ecutb.loffe.library.services.AppUserDetailsService;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
     @Autowired
     private AuthenticationEntryPoint entryPoint;
     @Autowired
@@ -26,9 +27,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(detailsService);
     }
-
-
-
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -42,17 +40,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic().authenticationEntryPoint(entryPoint)
                 .and()
                 .logout(l -> l.logoutSuccessUrl("/"));
-
-
-
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
-
 }
