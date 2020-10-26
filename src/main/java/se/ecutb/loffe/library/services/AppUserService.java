@@ -48,7 +48,7 @@ public class AppUserService {
     }
 
     public void update(String id, AppUser appUser) {
-        if (!appUserRepo.existsById(appUser.getId())) {
+        if (!appUserRepo.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Could not find the user by id '%s'.", id));
         }

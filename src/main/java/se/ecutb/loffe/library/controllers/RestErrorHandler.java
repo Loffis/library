@@ -10,18 +10,28 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import se.ecutb.loffe.library.entities.validation.EntityError;
+
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class RestErrorHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return super.handleMethodArgumentNotValid(ex, headers, status, request);
+        var entityErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> EntityError.builder()
+                    .field(fieldError.getField())
+                    .message((fieldError.getDefaultMessage()))
+                    .rejectedValue(String.valueOf(fieldError.getRejectedValue()))
+                    .build())
+                .collect(Collectors.toList());
+        return ResponseEntity.status(status).headers(headers).body(entityErrors);
     }
 
     @Override
     protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return super.handleBindException(ex, headers, status, request);
+        return ResponseEntity.status(status).headers(headers).body(ex.getBindingResult());
     }
 
     @Override

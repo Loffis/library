@@ -4,13 +4,14 @@ import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.ISBN;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 
-import static se.ecutb.loffe.library.constants.ValidationMessages.FIELD_REQUIRED_MSG;
+import static se.ecutb.loffe.library.constants.ValidationMessages.*;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ public class Book implements Serializable {
 
     @Id
     private String id;
-    @ISBN(type = ISBN.Type.ANY, message = "Not a valid ISBN number")
+    @ISBN(type = ISBN.Type.ANY, message = NO_VALID_ISBN_MSG)
     private String isbn;
     @NotEmpty(message = FIELD_REQUIRED_MSG)
     private String title;
@@ -26,7 +27,7 @@ public class Book implements Serializable {
     private String author;
     @NotEmpty(message = FIELD_REQUIRED_MSG)
     private List<String> genres;
-    @Size(min = 5, max = 1000, message = "Length must be {min} to {max}")
+    @Size(min = 5, max = 1000, message = WRONG_LENGTH_MSG)
     private String plot;
     boolean isAvailable;
 }

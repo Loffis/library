@@ -11,6 +11,9 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 
+import static se.ecutb.loffe.library.constants.RegExp.USERNAME_REGEXP_PATTERN;
+import static se.ecutb.loffe.library.constants.ValidationMessages.*;
+
 @Data
 @Builder
 public class AppUser implements Serializable {
@@ -18,13 +21,11 @@ public class AppUser implements Serializable {
     @Id
     private String id;
     @Indexed(unique = true)
-    @Pattern(regexp = "^[a-z]+[a-z0-9]{2,19}$",
-            message = "Username must be 3-20 characters. Valid characters: a-z, 0-9. Start with a-z.")
+    @Pattern(regexp = USERNAME_REGEXP_PATTERN, message = WRONG_LENGTH_MSG + " " + VALID_CHARS_MSG)
     private String username;
-    @Size(min = 4, max = 40, message = "Password must be 4-40 characters.")
+    @Size(min = 4, max = 40, message = WRONG_LENGTH_MSG)
     private String password;
-    @Email(message = "Not a valid email address")
+    @Email(message = NO_VALID_EMAIL_MSG)
     private String email;
     private List<String> acl;
-
 }

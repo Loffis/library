@@ -28,7 +28,7 @@ public class BookService {
 
     public Book findByIsbn(String isbn) {
         return bookRepo.findByIsbn(isbn).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("Could nout find book with ISBN '%s'.", isbn)));
+                String.format("Could not find book with ISBN '%s'.", isbn)));
     }
 
     public Book findByAuthor(String author) {

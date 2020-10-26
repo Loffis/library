@@ -3,6 +3,7 @@ package se.ecutb.loffe.library.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import se.ecutb.loffe.library.entities.AppUser;
 import se.ecutb.loffe.library.services.AppUserService;
@@ -29,12 +30,12 @@ public class AppUserController {
     }
 
     @PostMapping
-    public ResponseEntity<AppUser> save(@RequestBody AppUser appUser) {
+    public ResponseEntity<AppUser> save(@Validated @RequestBody AppUser appUser) {
         return ResponseEntity.ok(appUserService.save(appUser));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateUser(@PathVariable String id, @RequestBody AppUser appUser) {
+    public ResponseEntity<Void> updateUser(@PathVariable String id, @Validated @RequestBody AppUser appUser) {
         appUserService.update(id, appUser);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
