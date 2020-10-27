@@ -4,14 +4,13 @@ import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.ISBN;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 
-import static se.ecutb.loffe.library.constants.ValidationMessages.*;
+import static se.ecutb.loffe.library.constants.Messages.*;
 
 @Data
 @Builder

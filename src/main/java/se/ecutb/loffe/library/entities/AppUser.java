@@ -9,11 +9,10 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import static se.ecutb.loffe.library.constants.RegExp.USERNAME_REGEXP_PATTERN;
-import static se.ecutb.loffe.library.constants.ValidationMessages.*;
+import static se.ecutb.loffe.library.constants.Messages.*;
 
 @Data
 @Builder
