@@ -29,5 +29,7 @@ public class Book implements Serializable {
     private List<String> genres;
     @Size(min = 5, max = 1000, message = WRONG_LENGTH_MSG)
     private String plot;
-    boolean isAvailable;
+    private boolean isAvailable;
+    private String borrowerId;
+
 }

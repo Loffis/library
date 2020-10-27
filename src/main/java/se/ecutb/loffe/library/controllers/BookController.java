@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import se.ecutb.loffe.library.entities.Book;
+import se.ecutb.loffe.library.services.AppUserService;
 import se.ecutb.loffe.library.services.BookService;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class BookController {
 
     @Autowired
     private BookService bookService;
+
 
     @GetMapping
     public ResponseEntity<List<Book>> findAllBooks() {
@@ -45,5 +47,6 @@ public class BookController {
         bookService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
 
 }

@@ -9,6 +9,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import static se.ecutb.loffe.library.constants.RegExp.USERNAME_REGEXP_PATTERN;
@@ -28,4 +29,7 @@ public class AppUser implements Serializable {
     @Email(message = NO_VALID_EMAIL_MSG)
     private String email;
     private List<String> acl;
+    private List<Book> loans;
+
+
 }

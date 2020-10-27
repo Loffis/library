@@ -69,4 +69,5 @@ public class AppUserService {
         return appUserRepo.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("Could not find the user by name '%s'.", username)));
     }
+
 }
