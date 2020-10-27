@@ -24,7 +24,7 @@ public class LibraryService {
 
     public void borrowBook(String bookId, String userId) {
 
-        if (findBook(bookId) && checkBookAvailability(bookId) && userExists(userId)) {
+        if (findBook(bookId) && bookIsAvailable(bookId) && userExists(userId)) {
 
             var book = bookService.findById(bookId);
             var user = appUserRepo.findById(userId).get();
@@ -39,7 +39,24 @@ public class LibraryService {
             user.setLoans(tempBooks);
             book.setAvailable(false);
             book.setBorrowerId(userId);
-            book.setId(bookId);
+            //book.setId(bookId);
+            bookService.update(bookId, book);
+            appUserService.update(userId, user);
+        }
+    }
+
+    public void returnBook(String bookId, String userId) {
+        var book = bookService.findById(bookId);
+        var user = appUserRepo.findById(userId).get();
+
+        if (findBook(bookId) && bookIsNotAvailable(bookId) && userExists(userId)) {
+            List<Book> tempBooks = user.getLoans();
+            tempBooks.remove(bookId);
+            user.setLoans(tempBooks);
+
+            book.setBorrowerId(null);
+            book.setAvailable(true);
+            //book.setId(bookId);
             bookService.update(bookId, book);
             appUserService.update(userId, user);
         }
@@ -53,12 +70,21 @@ public class LibraryService {
         return true;
     }
 
-    private boolean checkBookAvailability(String bookId) {
+    private boolean bookIsAvailable(String bookId) {
         var book = bookService.findById(bookId);
 
         if (!book.isAvailable()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     String.format("Book '%s' is currently unavailable.", book.getTitle()));
+        }
+        return true;
+    }
+
+    private boolean bookIsNotAvailable(String bookId) {
+        var book = bookService.findById(bookId);
+
+        if (book.isAvailable()) {
+            return false;
         }
         return true;
     }

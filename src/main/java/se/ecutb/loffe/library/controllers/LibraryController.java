@@ -18,4 +18,11 @@ public class LibraryController {
         libraryService.borrowBook(id, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @PutMapping("/return/{id}")
+    public ResponseEntity<Void> returnLoan(@PathVariable String id, @RequestParam String userId) {
+        libraryService.returnBook(id, userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }
