@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
@@ -32,5 +33,6 @@ public class Book implements Serializable {
     private String plot;
     private boolean isAvailable;
     private String borrowerId;
+    private File image;
 
 }
