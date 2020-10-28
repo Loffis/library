@@ -251,6 +251,7 @@
         <appender-ref ref="USER_ERROR_DETAILS" />
     </logger>
 
+    <!--
     <logger name="se.ecutb.loffe.library" level="warn">
         <appender-ref ref="USER_WARN" />
     </logger>
@@ -258,5 +259,6 @@
     <logger name="se.ecutb.loffe.library" level="error">
         <appender-ref ref="USER_ERROR" />
         <appender-ref ref="USER_ERROR_DETAILS" />
-    </logger>-->
+    </logger>
+    -->
 </configuration>
