@@ -20,9 +20,17 @@ public class LibraryController {
     }
 
     @PutMapping("/return/{id}")
-    public ResponseEntity<Void> returnLoan(@PathVariable String id, @RequestParam String userId) {
-        libraryService.returnBook(id, userId);
+    public ResponseEntity<Void> returnLoan(@PathVariable String bookId, @RequestParam String userId) {
+        libraryService.returnBook(bookId, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @PutMapping("/returnall/{id}")
+    public ResponseEntity<Void> returnAll(@PathVariable String id) {
+        libraryService.returnAllBooks(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+
 
 }

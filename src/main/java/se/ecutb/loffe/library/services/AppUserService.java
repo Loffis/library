@@ -62,6 +62,8 @@ public class AppUserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Could not find the user by id '%s'.", id));
         }
+        // Om jag injectar LibraryService får jag "circular dependency injection"
+        // returnAllBooks(id);
         appUserRepo.deleteById(id);
     }
 

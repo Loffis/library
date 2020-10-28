@@ -1,5 +1,7 @@
 package se.ecutb.loffe.library.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -20,15 +22,15 @@ public class AppUser implements Serializable {
 
     @Id
     private String id;
-    @Indexed(unique = true)
-    @Pattern(regexp = USERNAME_REGEXP_PATTERN, message = WRONG_LENGTH_MSG + " " + VALID_CHARS_MSG)
+    @Indexed(unique = true) // Doesn't work without a MongoTemplate. Not implemented (yet).
+    @Pattern(regexp = USERNAME_REGEXP_PATTERN, message = WRONG_USERNAME_MSG)
     private String username;
     @Size(min = 4, max = 40, message = WRONG_LENGTH_MSG)
     private String password;
     @Email(message = NO_VALID_EMAIL_MSG)
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String email;
     private List<String> acl;
     private List<Book> loans;
-
-
 }

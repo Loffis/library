@@ -21,8 +21,18 @@ public class BookController {
 
 
     @GetMapping
-    public ResponseEntity<List<Book>> findAllBooks() {
-        return ResponseEntity.ok(bookService.findAll());
+    public ResponseEntity<List<Book>> findAllBooks(
+            @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) boolean sortByIsbn,
+            @RequestParam(required = false) boolean sortByTitle,
+            @RequestParam(required = false) boolean sortByAuthor,
+            @RequestParam(required = false) boolean sortByGenre) {
+        return ResponseEntity.ok(bookService.findAll(
+                isbn, title, author, genre,
+                sortByIsbn, sortByTitle, sortByAuthor, sortByGenre));
     }
 
     @GetMapping("/{id}")

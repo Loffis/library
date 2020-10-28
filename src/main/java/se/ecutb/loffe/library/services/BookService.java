@@ -15,24 +15,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookService {
 
-    private final BookRepository bookRepo;
+    public final BookRepository bookRepo;
 
-    public List<Book> findAll() {
-        return bookRepo.findAll();
+
+    public List<Book> findAll(String isbn, String title, String author, String genre,
+                              boolean sortByIsbn, boolean sortByTitle, boolean sortByAuthor, boolean sortByGenre) {
+        var books = bookRepo.findAll();
+
+        return books;
     }
 
     public Book findById(String id) {
         return bookRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("Could not find book with id %s.", id)));
-    }
-
-    public Book findByIsbn(String isbn) {
-        return bookRepo.findByIsbn(isbn).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("Could not find book with ISBN '%s'.", isbn)));
-    }
-
-    public Book findByAuthor(String author) {
-        return null;
     }
 
     public Book save(Book book) {
@@ -48,11 +43,16 @@ public class BookService {
         bookRepo.save(book);
     }
 
+
+
     public void delete(String id) {
         if (!bookRepo.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Could not find book with id '%s", id));
         }
+        // var book = bookRepo.findById(id).get();
+        // injectar jag LibraryService får jag "circular dependency injection"
+        // returnBook(id, book.getBorrowerId());
         bookRepo.deleteById(id);
     }
 

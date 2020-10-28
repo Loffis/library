@@ -2,6 +2,7 @@ package se.ecutb.loffe.library.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,7 +27,7 @@ public class LibraryService {
 
         if (findBook(bookId) && bookIsAvailable(bookId) && userExists(userId)) {
 
-            var book = bookService.findById(bookId);
+            var book = bookRepo.findById(bookId).get();
             var user = appUserRepo.findById(userId).get();
             List<Book> tempBooks = new ArrayList<>();
 
@@ -36,10 +37,10 @@ public class LibraryService {
                 tempBooks = user.getLoans();
                 tempBooks.add(book);
             }
-            user.setLoans(tempBooks);
+
             book.setAvailable(false);
             book.setBorrowerId(userId);
-            //book.setId(bookId);
+            user.setLoans(tempBooks);
             bookService.update(bookId, book);
             appUserService.update(userId, user);
         }
@@ -56,10 +57,33 @@ public class LibraryService {
 
             book.setBorrowerId(null);
             book.setAvailable(true);
-            //book.setId(bookId);
             bookService.update(bookId, book);
             appUserService.update(userId, user);
         }
+    }
+
+    public void returnAllBooks(String userId) {
+
+        if (!userExists(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("User with id '%s' does not exist.", userId));
+        }
+
+        var user = appUserRepo.findById(userId).get();
+        List<Book> tempBooks = bookRepo.findAll();
+
+        for (Book book : tempBooks) {
+            if (book.getBorrowerId() != null && book.getBorrowerId().equalsIgnoreCase(userId)) {
+                book.setBorrowerId(null);
+            }
+        }
+        if (user.getLoans().size() > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Could not return all books!");
+        }
+        user.setLoans(null);
+        bookRepo.deleteAll();
+        bookRepo.insert(tempBooks);
     }
 
     private boolean findBook(String bookId) {
@@ -82,11 +106,11 @@ public class LibraryService {
 
     private boolean bookIsNotAvailable(String bookId) {
         var book = bookService.findById(bookId);
-
-        if (book.isAvailable()) {
-            return false;
+        if (!book.isAvailable()) {
+            return true;
         }
-        return true;
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                String.format("Book '%s' is already in the library!", book.getTitle()));
     }
 
     private boolean userExists(String userId) {
@@ -96,5 +120,4 @@ public class LibraryService {
         }
         return true;
     }
-
 }
