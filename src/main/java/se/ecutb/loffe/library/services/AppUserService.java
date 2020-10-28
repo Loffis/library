@@ -2,6 +2,9 @@ package se.ecutb.loffe.library.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ public class AppUserService {
     private final AppUserRepository appUserRepo;
     private final PasswordEncoder passwordEncoder;
 
+    @Cacheable(value = "libraryCache")
     public List<AppUser> findAll(String username, boolean sort) {
         log.info("Retrieve all users");
         var appUsers = appUserRepo.findAll();
@@ -37,18 +41,21 @@ public class AppUserService {
         return appUsers;
     }
 
+    @Cacheable(value = "libraryCache", key = "#id")
     public AppUser findById(String id) {
         log.info("Retrieve user by id " + id);
         return appUserRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("Could not find the user by id '%s'.", id)));
     }
 
+    @CachePut(value = "libraryCache", key = "#result.id")
     public AppUser save(AppUser appUser) {
         log.info("Saving user " + appUser.getUsername());
         appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
         return appUserRepo.save(appUser);
     }
 
+    @CachePut(value = "libraryCache", key = "#id")
     public void update(String id, AppUser appUser) {
         log.info("Updating user...");
         if (!appUserRepo.existsById(id)) {
@@ -62,6 +69,7 @@ public class AppUserService {
         log.info("...user updated!");
     }
 
+    @CacheEvict(value = "libraryCache", key = "#id")
     public void delete(String id) {
         log.info("Deleting user by id " + id + "...");
         if (!appUserRepo.existsById(id)) {
@@ -73,7 +81,6 @@ public class AppUserService {
         // returnAllBooks(id);
         appUserRepo.deleteById(id);
         log.info("...user deleted!");
-
     }
 
     public AppUser findByUsername(String username) {
@@ -81,5 +88,4 @@ public class AppUserService {
         return appUserRepo.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("Could not find the user by name '%s'.", username)));
     }
-
 }

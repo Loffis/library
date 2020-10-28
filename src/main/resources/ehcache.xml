@@ -11,7 +11,7 @@
         </expiry>
         <listeners>
             <listener>
-                <class>com.example.user.config.CacheLogger</class>
+                <class>se.ecutb.loffe.library.config.CacheLogger</class>
                 <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
                 <event-ordering-mode>UNORDERED</event-ordering-mode>
                 <events-to-fire-on>CREATED</events-to-fire-on>

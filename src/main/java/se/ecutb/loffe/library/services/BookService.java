@@ -2,6 +2,9 @@ package se.ecutb.loffe.library.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +22,7 @@ public class BookService {
 
     public final BookRepository bookRepo;
 
+    @Cacheable(value = "libraryCache")
     public List<Book> findAll(String isbn, String title, String author, String genre,
                               boolean sortByIsbn, boolean sortByTitle, boolean sortByAuthor, boolean sortByGenre) {
         log.info("Starting retrieving books...");
@@ -76,17 +80,20 @@ public class BookService {
         return books;
     }
 
+    @Cacheable(value = "libraryCache", key = "#id")
     public Book findById(String id) {
         log.info("Retrieving book by id " + id);
         return bookRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("Could not find book with id %s.", id)));
     }
 
+    @CachePut(value = "libraryCache", key = "#result.id")
     public Book save(Book book) {
         log.info("Saving book with title " + book.getTitle());
         return bookRepo.save(book);
     }
 
+    @CachePut(value = "libraryCache", key = "#id")
     public void update(String id, Book book) {
         log.info("Updating book with id " + id);
         if (!bookRepo.existsById(id)) {
@@ -99,6 +106,7 @@ public class BookService {
         log.info("Book with id " + id + " is saved.");
     }
 
+    @CacheEvict(value = "libraryCache", key = "#id")
     public void delete(String id) {
         log.info("Deleting book with id " + id);
         if (!bookRepo.existsById(id)) {

@@ -2,6 +2,8 @@ package se.ecutb.loffe.library.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ public class LibraryService {
     public final AppUserRepository appUserRepo;
     public final BookRepository bookRepo;
 
+    // TODO: split method into several minor methods
+    @CachePut(value = "libraryCache", key = "#bookId")
     public void borrowBook(String bookId, String userId) {
         log.info("Trying to borrow book.");
         log.info("User exists: " + appUserRepo.existsById(userId));
@@ -45,8 +49,8 @@ public class LibraryService {
                 var user = appUserRepo.findById(userId).get();
                 List<Book> tempBooks = new ArrayList<>();
 
-                if (user.getLoans() == null) {
-                    log.info("User has no loans before.");
+                if (user.getLoans() == null || user.getLoans().size() == 0) {
+                    log.info("User has no loans.");
                     tempBooks.add(book);
                 } else {
                     tempBooks = user.getLoans();
@@ -65,12 +69,10 @@ public class LibraryService {
             log.warn("Either book id or user id is missing.");
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Missing id for book or user");
-
         }
-
-
     }
 
+    @CachePut(value = "libraryCache", key = "#bookId")
     public void returnBook(String bookId, String userId) {
         log.info("Try to return book with id " + bookId);
         var book = bookService.findById(bookId);
@@ -90,6 +92,7 @@ public class LibraryService {
         }
     }
 
+    @CachePut(value = "libraryCache", key = "#userId")
     public void returnAllBooks(String userId) {
         log.info("Try to return all books for user with id " + userId);
 
@@ -113,17 +116,17 @@ public class LibraryService {
         user.setLoans(usersBooks);
         if (user.getLoans().size() > 0) {
             log.warn("Could not return all books. There are still " + user.getLoans().size() + " book(s) left.");
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Could not return all books!");
         }
-        //user.setLoans(null);
         appUserRepo.save(user);
         bookRepo.deleteAll();
         bookRepo.insert(tempBooks);
         log.info("All books returned!");
     }
 
-    private boolean findBook(String bookId) {
+    @Cacheable(value = "libraryCache", key = "#bookId")
+    public boolean findBook(String bookId) {
         log.info("Try to find book by id " + bookId);
         if (bookRepo.findById(bookId).isEmpty()) {
             log.warn("Could not find book by id " + bookId);
@@ -134,7 +137,8 @@ public class LibraryService {
         return true;
     }
 
-    private boolean bookIsAvailable(String bookId) {
+    @Cacheable(value = "libraryCache", key = "#bookId")
+    public boolean bookIsAvailable(String bookId) {
         log.info("Checking if book with id " + bookId + " is available.");
         var book = bookService.findById(bookId);
 
@@ -147,7 +151,8 @@ public class LibraryService {
         return true;
     }
 
-    private boolean bookIsNotAvailable(String bookId) {
+    @Cacheable(value = "libraryCache", key = "#bookId")
+    public boolean bookIsNotAvailable(String bookId) {
         log.info("Checking if book by id " + bookId + " is borrowed.");
         var book = bookService.findById(bookId);
         if (!book.isAvailable()) {
