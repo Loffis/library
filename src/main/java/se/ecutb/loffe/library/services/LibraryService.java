@@ -3,6 +3,7 @@ package se.ecutb.loffe.library.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import se.ecutb.loffe.library.entities.Book;
@@ -23,30 +24,51 @@ public class LibraryService {
     public final BookRepository bookRepo;
 
     public void borrowBook(String bookId, String userId) {
-        log.info("Trying to borrow book with id " + bookId);
-
-        if (findBook(bookId) && bookIsAvailable(bookId) && appUserRepo.existsById(userId)) {
-            log.info("Book id exists, book is available and the user exists!");
-
-            var book = bookRepo.findById(bookId).get();
-            var user = appUserRepo.findById(userId).get();
-            List<Book> tempBooks = new ArrayList<>();
-
-            if (user.getLoans() == null) {
-                log.info("User has no loans before.");
-                tempBooks.add(book);
-            } else {
-                tempBooks = user.getLoans();
-                tempBooks.add(book);
+        log.info("Trying to borrow book.");
+        log.info("User exists: " + appUserRepo.existsById(userId));
+        log.info("Book exists: " + bookRepo.existsById(bookId));
+        if (appUserRepo.existsById(userId) && bookRepo.existsById(bookId)) {
+            log.info("Book id exists. User id exists.");
+            var isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().toUpperCase().equals("ROLE_ADMIN"));
+            var isLoggedInUser = SecurityContextHolder.getContext().getAuthentication()
+                    .getName().toLowerCase().equals(appUserRepo.findById(userId).get().getUsername().toLowerCase());
+            if(!isAdmin && !isLoggedInUser) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "You have not authorization to borrow a book for this user.");
             }
 
-            book.setAvailable(false);
-            book.setBorrowerId(userId);
-            user.setLoans(tempBooks);
-            bookService.update(bookId, book);
-            appUserService.update(userId, user);
-            log.info("User " + user.getUsername() + " has borrowed " + book.getTitle() + "!");
+            if (bookIsAvailable(bookId)) {
+                log.info("Book is available!");
+
+                var book = bookRepo.findById(bookId).get();
+                var user = appUserRepo.findById(userId).get();
+                List<Book> tempBooks = new ArrayList<>();
+
+                if (user.getLoans() == null) {
+                    log.info("User has no loans before.");
+                    tempBooks.add(book);
+                } else {
+                    tempBooks = user.getLoans();
+                    tempBooks.add(book);
+                }
+
+                book.setAvailable(false);
+                book.setBorrowerId(userId);
+                user.setLoans(tempBooks);
+                bookService.update(bookId, book);
+                appUserService.update(userId, user);
+                log.info("User " + user.getUsername() + " has borrowed " + book.getTitle() + "!");
+            }
+
+        } else {
+            log.warn("Either book id or user id is missing.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Missing id for book or user");
+
         }
+
+
     }
 
     public void returnBook(String bookId, String userId) {
@@ -55,8 +77,9 @@ public class LibraryService {
         var user = appUserRepo.findById(userId).get();
 
         if (findBook(bookId) && bookIsNotAvailable(bookId) && appUserRepo.existsById(userId)) {
+            log.info("Book id exists, book is borrowed and the user exists!");
             List<Book> tempBooks = user.getLoans();
-            tempBooks.remove(bookId);
+            tempBooks.remove(bookRepo.findById(bookId).get());
             user.setLoans(tempBooks);
 
             book.setBorrowerId(null);
@@ -65,7 +88,6 @@ public class LibraryService {
             appUserService.update(userId, user);
             log.info("Book is returned!");
         }
-        log.warn("Book could not be returned.");
     }
 
     public void returnAllBooks(String userId) {
@@ -79,18 +101,23 @@ public class LibraryService {
 
         var user = appUserRepo.findById(userId).get();
         List<Book> tempBooks = bookRepo.findAll();
+        List<Book> usersBooks = user.getLoans();
+
 
         for (Book book : tempBooks) {
             if (book.getBorrowerId() != null && book.getBorrowerId().equalsIgnoreCase(userId)) {
                 book.setBorrowerId(null);
+                usersBooks.remove(book);
             }
         }
+        user.setLoans(usersBooks);
         if (user.getLoans().size() > 0) {
-            log.warn("Could not return all books. There are still " + user.getLoans().size() + " books left.");
+            log.warn("Could not return all books. There are still " + user.getLoans().size() + " book(s) left.");
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Could not return all books!");
         }
-        user.setLoans(null);
+        //user.setLoans(null);
+        appUserRepo.save(user);
         bookRepo.deleteAll();
         bookRepo.insert(tempBooks);
         log.info("All books returned!");

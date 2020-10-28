@@ -16,6 +16,8 @@ import static se.ecutb.loffe.library.constants.Messages.*;
 @Builder
 public class Book implements Serializable {
 
+    private static final long serialVersionUID = -3308181849993556120L;
+
     @Id
     private String id;
     @ISBN(type = ISBN.Type.ANY, message = NO_VALID_ISBN_MSG)

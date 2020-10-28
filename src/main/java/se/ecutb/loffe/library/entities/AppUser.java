@@ -20,16 +20,18 @@ import static se.ecutb.loffe.library.constants.Messages.*;
 @Builder
 public class AppUser implements Serializable {
 
+    private static final long serialVersionUID = -2118771206157720830L;
+
     @Id
     private String id;
     @Indexed(unique = true) // Doesn't work without a MongoTemplate. Not implemented (yet).
     @Pattern(regexp = USERNAME_REGEXP_PATTERN, message = WRONG_USERNAME_MSG)
     private String username;
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Size(min = 4, max = 40, message = WRONG_LENGTH_MSG)
     private String password;
     @Email(message = NO_VALID_EMAIL_MSG)
-    @JsonIgnore
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String email;
     private List<String> acl;
     private List<Book> loans;
